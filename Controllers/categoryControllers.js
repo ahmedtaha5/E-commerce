@@ -9,9 +9,8 @@ exports.getAllCategories = asyncHandler(async (req, res, next) => {
   const limit = req.query.limit * 1 || 6;
   const skip = (page - 1) * limit;
   const categories = await categoryModel
-    .find({})
+    .find()
     .skip(skip)
-    .page(page)
     .limit(limit);
   if (!categories) {
     return next(new Error('No categories found!'));
@@ -53,5 +52,32 @@ exports.createCategory = asyncHandler(async (req, res) => {
     data: {
       category
     }
+  });
+});
+
+exports.updateCategory = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+  const category = await categoryModel.findOneAndUpdate(
+    {
+      _id: id
+    },
+    { name: name, slug: slugify(name) },
+    { new: true }
+  );
+  res.status(200).json({
+    success: true,
+    data: {
+      category
+    }
+  });
+});
+
+exports.deleteCategory = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  await categoryModel.findByIdAndDelete(id);
+  res.status(204).json({
+    success: true,
+    data: {}
   });
 });
