@@ -11,6 +11,8 @@ const {
 const {
   signup,
   login,
+  logout,
+  refresh,
   forgetPassword,
   verifyPasswordResetCode,
   resetPassword
@@ -18,6 +20,8 @@ const {
 
 router.post('/signup', signupValidator, signup);
 router.post('/login', loginValidator, login);
+router.post('/logout', logout);
+router.get('/refresh', refresh);
 router.post('/forgotPassword', forgetPassword);
 router.post('/verifyResetCode', verifyPasswordResetCode);
 router.patch('/resetPassword', resetPasswordValidator, resetPassword);
