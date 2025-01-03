@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-
+//const ms = require('ms');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcryptjs');
@@ -8,6 +8,36 @@ const User = require('../Models/userModel');
 const sendEmail = require('../utils/sendEmail');
 const generateToken = require('../utils/generateToken');
 
+// Cookie options
+const cookieOptions = {
+  expires: process.env.JWT_REFRESH_EXPIRE, // Convert "7d" to milliseconds
+  httpOnly: true,
+  sameSite: 'strict',
+  secure: process.env.NODE_ENV === 'production'
+};
+
+const sendResponse = async (res, user, code) => {
+  const token = generateToken(user._id);
+
+  // Generate refresh token
+  const refreshToken = jwt.sign(
+    { id: user._id },
+    process.env.JWT_REFRESH_TOKEN, // Ensure this environment variable is set correctly
+    { expiresIn: process.env.JWT_REFRESH_EXPIRE || '7d' }
+  );
+
+  // Set the cookie
+  res.cookie('refreshToken', refreshToken, cookieOptions);
+
+  // Send the response
+  res.status(code).json({
+    success: true,
+    token,
+    refreshToken,
+    user
+  });
+};
+
 exports.signup = asyncHandler(async (req, res, next) => {
   const user = await User.create({
     name: req.body.name,
@@ -15,7 +45,6 @@ exports.signup = asyncHandler(async (req, res, next) => {
     password: req.body.password,
     phone: req.body.phone
   });
-  const token = generateToken(user._id);
   // Exclude password from response
   const userData = {
     _id: user._id,
@@ -23,11 +52,7 @@ exports.signup = asyncHandler(async (req, res, next) => {
     email: user.email,
     phone: user.phone
   };
-  res.status(201).json({
-    success: true,
-    user: userData,
-    token
-  });
+  sendResponse(res, userData, 201);
 });
 
 exports.login = asyncHandler(async (req, res, next) => {
@@ -41,13 +66,8 @@ exports.login = asyncHandler(async (req, res, next) => {
     return next(new AppError('Invalid email or password', 401));
   }
   // Generate JWT token
-  const token = generateToken(user._id);
   user.password = undefined;
-  res.status(201).json({
-    success: true,
-    user,
-    token
-  });
+  sendResponse(res, user, 201);
 });
 
 exports.protect = asyncHandler(async (req, res, next) => {
@@ -90,7 +110,6 @@ exports.protect = asyncHandler(async (req, res, next) => {
       new AppError('Your account is not active. Please contact support.', 403)
     );
   }
-
   req.user = currentUser;
   next();
 });
@@ -144,11 +163,8 @@ exports.forgetPassword = asyncHandler(async (req, res, next) => {
       new AppError('Failed to send reset code. Please try again later.', 500)
     );
   }
-
-  res.status(200).json({
-    success: true,
-    message: 'Reset code sent successfully. Check your email.'
-  });
+  // sending response
+  sendResponse(res, { message: 'Reset code sent successfully.' }, 200);
 });
 
 exports.verifyPasswordResetCode = asyncHandler(async (req, res, next) => {
@@ -211,12 +227,63 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
   // Save the updated user
   await user.save();
 
-  // Generate a new JWT token
-  const token = generateToken(user._id);
+  sendResponse(
+    res,
+    { message: 'Password updated successfully. You can now log in.' },
+    200
+  );
+});
 
-  res.status(200).json({
-    success: true,
-    message: 'Password updated successfully. You can now log in.',
-    token
-  });
+// Refresh token handler
+exports.refresh = asyncHandler(async (req, res, next) => {
+  // eslint-disable-next-line
+  const refreshToken = req.cookies.refreshToken;
+  console.log(`refresh token: ${refreshToken}`);
+  // Check if refresh token exists
+  if (!refreshToken) {
+    return next(
+      new AppError('You are not logged in. Please log in to get access', 401)
+    );
+  }
+
+  try {
+    // Verify the refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_refresh_Token);
+    console.log(decoded);
+
+    // Find the user by ID from the decoded token
+    const existingUser = await User.findById(decoded.id);
+    if (!existingUser) {
+      return next(new AppError('Refresh token is not valid', 403));
+    }
+    // Generate a new access token
+
+    // Send the new token in the response
+    sendResponse(res, existingUser._id, 200);
+  } catch (err) {
+    // Handle invalid or expired refresh tokens
+    return next(new AppError('Refresh token is not valid', 403));
+  }
+});
+
+// Logout handler
+exports.logout = asyncHandler(async (req, res, next) => {
+  if (!req.cookies.refreshToken) {
+    return res.status(204).json({ status: 'success' });
+  }
+
+  const { refreshToken } = req.cookies;
+
+  const user = await User.findOne({ refreshToken });
+
+  if (!user) {
+    res.clearCookie('refreshToken', cookieOptions);
+    return res.status(204).json({ status: 'success' });
+  }
+
+  user.refreshToken = '';
+  await user.save();
+
+  res.clearCookie('refreshToken', cookieOptions);
+  return res.status(200).json({ status: 'success' });
 });
