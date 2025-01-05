@@ -1,83 +1,34 @@
 const asyncHandler = require('express-async-handler');
+const sharp = require('sharp');
 
-const slugify = require('slugify');
-const mongoose = require('mongoose');
-const categoryModel = require('../Models/categoryModel');
+const { v4: uuidv4 } = require('uuid');
+const { uploadSingleImage } = require('../Middlewares/uploadImageMiddleware');
+const Category = require('../Models/categoryModel');
+const handlerFactory = require('../Controllers/handlerFactory');
 
-exports.getAllCategories = asyncHandler(async (req, res, next) => {
-  const page = req.query.page * 1 || 1;
-  const limit = req.query.limit * 1 || 6;
-  const skip = (page - 1) * limit;
-  const categories = await categoryModel
-    .find()
-    .skip(skip)
-    .limit(limit);
-  if (!categories) {
-    return next(new Error('No categories found!'));
+exports.uploadCategoryImage = uploadSingleImage('image');
+
+exports.resizeCategoryImage = asyncHandler(async (req, res, next) => {
+  const filename = `Category-${uuidv4()}-${Date.now()}.jpeg`;
+  if (!req.file) {
+    return next(new Error('No file uploaded!'));
   }
-  res.status(200).json({
-    success: true,
-    count: categories.length,
-    data: {
-      categories
-    }
-  });
+  await sharp(req.file.buffer)
+    .resize(320, 240)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`uploads/categories/${filename}`);
+
+  req.body.image = filename;
+  next();
 });
 
-exports.getCategory = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(404).json({
-      success: false,
-      msg: `Category not found for the id: ${id}`
-    });
-  }
-  const category = await categoryModel.findById(id);
-  res.status(200).json({
-    success: true,
-    data: {
-      category
-    }
-  });
-});
+exports.getAllCategories = handlerFactory.getAll(Category);
 
-exports.createCategory = asyncHandler(async (req, res) => {
-  const { name } = req.body;
-  const category = await categoryModel.create({
-    name,
-    slug: slugify(name)
-  });
-  res.status(201).json({
-    success: true,
-    data: {
-      category
-    }
-  });
-});
+exports.getCategory = handlerFactory.getOne(Category);
 
-exports.updateCategory = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { name } = req.body;
-  const category = await categoryModel.findOneAndUpdate(
-    {
-      _id: id
-    },
-    { name: name, slug: slugify(name) },
-    { new: true }
-  );
-  res.status(200).json({
-    success: true,
-    data: {
-      category
-    }
-  });
-});
+exports.createCategory = handlerFactory.createOne(Category);
 
-exports.deleteCategory = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  await categoryModel.findByIdAndDelete(id);
-  res.status(204).json({
-    success: true,
-    data: {}
-  });
-});
+exports.updateCategory = handlerFactory.updateOne(Category);
+
+exports.deleteCategory = handlerFactory.deleteOne(Category);
