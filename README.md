@@ -1,53 +1,40 @@
-🛒 E-Commerce RESTful API
-Overview
-The E-Commerce RESTful API is a comprehensive backend solution built using modern technologies: Node.js, Express.js, and MongoDB. It provides a seamless and secure experience for users to browse, shop, and manage their orders on both mobile and web applications.
+E-Commerce Backend API
+A robust and scalable RESTful API designed for real-world e-commerce platforms, ready to integrate with mobile or web e-shop applications.
 
-Key Features
-Secure Authentication & Authorization:
+Features
+User Authentication & Authorization
 
-Implemented JWT-based authentication for secure user login, registration, and role-based access control.
+Login and registration with secure JWT authentication.
+Password reset and confirmation email functionality.
+Advanced Query Features
 
-Features like password reset and email confirmation for enhanced security.
+Searching, sorting, filtering, and pagination for efficient data retrieval.
+E-Commerce Essentials
 
-Advanced Product Browsing:
+Star rating and review system for products.
+Discount coupon codes for promotions.
+Wishlist and cart management with dynamic item handling.
+Payment options:
+Cash on Delivery (no online payment required).
+Credit Card Payment using Stripe integration.
+Database & Relationships
 
-Integrated search, filtering, sorting, and pagination for efficient product discovery.
+MongoDB Atlas for cloud-based database storage.
+Advanced relationships and queries using Mongoose.
+File Management
 
-Star rating system for user feedback and product ratings.
+Image upload and processing (single and multiple files).
+Efficient storage and retrieval of complex data structures.
+Modern Development Practices
 
-Core E-Commerce Functionalities:
+Built with modern JavaScript (ES6, ES7).
+Middleware implementation with Express.js and Mongoose.
+Deployment
 
-Add-to-cart and wishlist for a seamless shopping experience.
-
-Discount coupon codes for promotional offers.
-
-Payment Integration:
-
-Supports cash-on-delivery for flexible transactions.
-
-Stripe-powered credit card payments for secure online payments.
-
-Image Management:
-
-Enables image uploads and processing for product displays.
-
-Scalable Database:
-
-Utilized MongoDB with advanced Mongoose queries to manage complex data relationships.
-
-Deployment:
-
-Deployed on Vercel for high availability, scalability, and seamless integration with frontend systems.
-
-Technologies Used
-Node.js
-
-Express.js
-
-MongoDB
-
-Mongoose
-
-Stripe for payment processing
-
-Vercel for deployment
+Fully deployable API ready for production environments.
+Technology Stack
+Backend Framework: Node.js with Express.js
+Database: MongoDB (Cloud-based with MongoDB Atlas)
+Authentication: JWT (JSON Web Tokens)
+Payments: Stripe integration
+File Upload: Multer and sharp for image handling
