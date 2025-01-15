@@ -12,7 +12,8 @@ const brandSchema = new mongoose.Schema(
     slug: {
       type: String,
       lowercase: true
-    }
+    },
+    image: String
   },
   { timestamps: true }
 );
@@ -21,6 +22,21 @@ brandSchema.set('toJSON', {
     delete ret.__v;
     return ret;
   }
+});
+
+const setImageUrl = doc => {
+  if (doc.image) {
+    const imageURL = `${process.env.BaseUrl}/brands/${doc.image}`;
+    doc.image = imageURL;
+  }
+};
+// (getOne, getAll, update) category
+brandSchema.post('init', doc => {
+  setImageUrl(doc);
+});
+// for create brand
+brandSchema.post('save', doc => {
+  setImageUrl(doc);
 });
 
 const brandModel = mongoose.model('brand', brandSchema);

@@ -21,6 +21,10 @@ const {
   resizeProductImage
 } = require('../Controllers/productControllers');
 
+const reviewRoutes = require('./reviewRoutes');
+
+router.use('/:productId/reviews', reviewRoutes);
+
 router
   .route('/')
   .get(getAllProducts)
@@ -35,7 +39,7 @@ router
 
 router
   .route('/:id')
-  .get(protect, allowedTo('admin', 'manager'), getProductValidator, getProduct)
+  .get(protect, getProductValidator, getProduct)
   .patch(
     protect,
     allowedTo('admin', 'manager'),
@@ -47,3 +51,5 @@ router
   .delete(protect, allowedTo('admin'), deleteProductValidator, deleteProduct);
 
 module.exports = router;
+
+// /api/v1/products/:productId  675aeecd9f9f1bbd0b90de30/reviews
