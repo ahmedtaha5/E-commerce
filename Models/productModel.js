@@ -30,7 +30,7 @@ const productSchema = new mongoose.Schema(
     price: {
       type: Number,
       required: [true, 'Product price is required'],
-      max: [250000, 'Product price must be at most 6 chars']
+      max: [250000, 'Product price must be at most 250,000']
     },
     priceAfterDiscount: {
       type: Number
@@ -69,16 +69,20 @@ const productSchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    // enable virtual populate
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
   }
 );
-// productSchema.set('toJSON', {
-//   transform: (doc, ret) => {
-//     delete ret.__v;
-//     return ret;
-//   }
-// });
-productSchema.pre('/^find/', function(next) {
+
+productSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'product',
+  localField: '_id'
+});
+
+productSchema.pre(/^find/, function(next) {
   this.populate({
     path: 'category',
     select: 'name -_id'
@@ -100,17 +104,13 @@ const setImageUrl = doc => {
     doc.images = imagesList;
   }
 };
-productSchema.set('toJSON', {
-  transform: (doc, ret) => {
-    delete ret.__v;
-    return ret;
-  }
-});
+
 productSchema.post('init', doc => {
   setImageUrl(doc);
 });
 productSchema.post('save', doc => {
   setImageUrl(doc);
 });
+
 const Product = mongoose.model('Product', productSchema);
 module.exports = Product;

@@ -7,13 +7,9 @@ const cookieParser = require('cookie-parser');
 const globalError = require('./Middlewares/errorMiddleware');
 const AppError = require('./utils/appError');
 const dbConnection = require('./Config/database');
+
 // Routes
-const categoryRoutes = require('./routes/categoryRoutes');
-const subCategoryRoutes = require('./routes/subCategoryRoutes');
-const brandRoutes = require('./routes/brandRoutes');
-const productRoutes = require('./routes/productRoutes');
-const userRoutes = require('./routes/userRoutes');
-const authRoutes = require('./routes/authRoutes');
+const mountRoutes = require('./routes/index');
 
 dotenv.config({ path: 'config.env' });
 
@@ -28,14 +24,15 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'uploads')));
 
-// Category routes
-app.use('/api/v1/categories', categoryRoutes);
-app.use('/api/v1/subcategories', subCategoryRoutes);
-app.use('/api/v1/brands', brandRoutes);
-app.use('/api/v1/products', productRoutes);
-app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/auth', authRoutes);
-
+mountRoutes(app);
+// app.use('/api/v1/categories', categoryRoutes);
+// app.use('/api/v1/subcategories', subCategoryRoutes);
+// app.use('/api/v1/brands', brandRoutes);
+// app.use('/api/v1/products', productRoutes);
+// app.use('/api/v1/users', userRoutes);
+// app.use('/api/v1/auth', authRoutes);
+// app.use('/api/v1/reviews', reviewRoutes);
+// app.use('/api/v1/wishlist', wishlistRoutes);
 // Handle undefined routes
 app.all('*', (req, res, next) => {
   return next(new AppError(`Cannot find this route: ${req.originalUrl}`, 404));
