@@ -45,5 +45,5 @@ A **Real-World Backend RESTful API** for an E-Commerce platform, designed to be 
 
 ### 1. Clone the Repository  
 ```bash  
-git clone https://github.com/your-username/ecommerce-backend.git  
-cd ecommerce-backend  
+git clone https://github.com/ahmedtaha5/E-commerce.git  
+cd ecommerce  
