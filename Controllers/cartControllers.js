@@ -124,48 +124,37 @@ exports.updateCartItemQuantity = asyncHandler(async (req, res, next) => {
 });
 
 exports.applyCoupon = asyncHandler(async (req, res, next) => {
-  const { coupon } = req.body;
-  const CouponExist = Coupon.findOne({ coupon, expire: { $lt: Date.now() } });
-  if (!CouponExist) {
+  // 1) Get coupon based on coupon name
+  const { name } = req.body;
+  const coupon = await Coupon.findOne({
+    name,
+    expire: { $gt: Date.now() }
+  });
+  if (!coupon) {
     return next(new AppError('Coupon is invalid or expired.', 400));
   }
-  const cart = Cart.findOne({ user: req.user._id });
 
-  cart.totalPriceAfterDiscount = cart.totalCartPrice * coupon.discount;
+  // 2) Get logged user cart to get total cart price
+  const cart = await Cart.findOne({ user: req.user._id });
 
   if (!cart) {
     return next(new AppError(`there is no cart for user ${req.user._id}`, 404));
   }
+
+  const totalPrice = calcTotalCartPrice(cart);
+  // 3) Calculate price after Discount
+  const totalPriceAfterDiscount = (
+    totalPrice -
+    (totalPrice * coupon.discount) / 100
+  ).toFixed(2);
+
+  // 4) Update totalPriceAfterDiscount in cart document
+  cart.totalPriceAfterDiscount = totalPriceAfterDiscount;
+  await cart.save();
+
+  res.status(200).json({
+    status: 'success',
+    numOfCartItems: cart.cartItems.length,
+    data: cart
+  });
 });
-
-// exports.applyCoupon = asyncHandler(async (req, res, next) => {
-//   // 1) Get coupon based on coupon name
-//   const coupon = await Coupon.findOne({
-//     name: req.body.coupon,
-//     expire: { $gt: Date.now() },
-//   });
-
-//   if (!coupon) {
-//     return next(new ApiError(`Coupon is invalid or expired`));
-//   }
-
-//   // 2) Get logged user cart to get total cart price
-//   const cart = await Cart.findOne({ user: req.user._id });
-
-//   const totalPrice = cart.totalCartPrice;
-
-//   // 3) Calculate price after priceAfterDiscount
-//   const totalPriceAfterDiscount = (
-//     totalPrice -
-//     (totalPrice * coupon.discount) / 100
-//   ).toFixed(2); // 99.23
-
-//   cart.totalPriceAfterDiscount = totalPriceAfterDiscount;
-//   await cart.save();
-
-//   res.status(200).json({
-//     status: 'success',
-//     numOfCartItems: cart.cartItems.length,
-//     data: cart,
-//   });
-// });
