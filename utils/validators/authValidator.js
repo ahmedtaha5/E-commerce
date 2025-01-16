@@ -41,3 +41,11 @@ exports.loginValidator = [
     .withMessage('passwort must be at least 8 characters'),
   validatorMiddleware
 ];
+exports.resetPasswordValidator = [
+  check('password')
+    .notEmpty()
+    .withMessage('password is required')
+    .isLength({ min: 8 })
+    .withMessage('passwort must be at least 8 characters'),
+  validatorMiddleware
+];

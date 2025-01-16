@@ -6,18 +6,18 @@ const { protect, allowedTo } = require('../Controllers/authControllers');
 
 const {
   addProductToWishlist,
-  deleteProductfromWishlist,
-  getAllWishlist
+  removeProductFromWishlist,
+  getLoggedUserWishlist
 } = require('../Controllers/wishlistControllers');
 
 router
   .route('/')
-  .get(protect, allowedTo('user'), getAllWishlist)
+  .get(protect, allowedTo('user'), getLoggedUserWishlist)
   .post(protect, allowedTo('user'), addProductToWishlist);
 
 router
   .route('/:id')
-  .delete(protect, allowedTo('user'), deleteProductfromWishlist);
+  .delete(protect, allowedTo('user'), removeProductFromWishlist);
 
 module.exports = router;
 
