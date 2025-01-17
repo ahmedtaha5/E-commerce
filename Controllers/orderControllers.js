@@ -1,4 +1,8 @@
-const stripe = require('stripe')(process.env.SECRET_API_KEY);
+const dotenv = require('dotenv');
+
+dotenv.config({ path: 'config.env' });
+
+const stripe = require('stripe')(process.env.STRIPE_SECRET);
 const asyncHandler = require('express-async-handler');
 const AppError = require('../utils/appError');
 const Order = require('../Models/orderModel');
@@ -99,12 +103,15 @@ exports.updateOrderToDeliverd = asyncHandler(async (req, res, next) => {
   });
 });
 
-//api/v1/order/checkout-session/cartId
-exports.createSession = asyncHandler(async (req, res, next) => {
-  const cart = await Order.findById(req.params.cartId);
+// api/v1/order/checkout-session/:cartId
+exports.checkoutSession = asyncHandler(async (req, res, next) => {
+  // 1) Get the cart based on cartId
+  const cart = await Cart.findById(req.params.cartId);
   if (!cart) {
     return next(new AppError(`Cart not found`, 404));
   }
+
+  // 2) Calculate the total order price
   const taxPrice = 0;
   const shippingPrice = 0;
   const cartPrice = cart.totalPriceAfterDiscount
@@ -112,22 +119,33 @@ exports.createSession = asyncHandler(async (req, res, next) => {
     : cart.totalCartPrice;
   const totalOrderPrice = cartPrice + taxPrice + shippingPrice;
 
+  // 3) Create a Stripe checkout session
   const session = await stripe.checkout.sessions.create({
-    Line_items: [
+    payment_method_types: ['card'], // Specify payment methods
+    line_items: [
       {
-        name: req.user.name,
-        amount: totalOrderPrice * 100,
-        currency: 'egp',
+        price_data: {
+          currency: 'egp',
+          product_data: {
+            name: req.user.name
+          },
+          unit_amount: totalOrderPrice * 100
+        },
         quantity: 1
       }
     ],
-    mode: 'payment',
+    mode: 'payment', // Payment mode
     success_url: `${req.protocol}://${req.get('host')}/order`,
     cancel_url: `${req.protocol}://${req.get('host')}/cart`,
     customer_email: req.user.email,
-    metadata: req.body.shippingAddress,
-    client_reference_id: Cart._id
+    metadata: {
+      shippingAddress: req.body.shippingAddress, // Add shipping address to metadata
+      cartId: req.params.cartId // Add cart ID to metadata
+    },
+    client_reference_id: req.params.cartId // Reference ID for the cart
   });
+
+  // 4) Send the session as a response
   res.status(200).json({
     status: 'success',
     session
