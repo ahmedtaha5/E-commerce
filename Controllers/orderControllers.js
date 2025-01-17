@@ -1,3 +1,4 @@
+const stripe = require('stripe')(process.env.SECRET_API_KEY);
 const asyncHandler = require('express-async-handler');
 const AppError = require('../utils/appError');
 const Order = require('../Models/orderModel');
@@ -65,3 +66,70 @@ exports.filterOrderForLoggedUser = asyncHandler(async (req, res, next) => {
 exports.findAllOrders = handlerFactory.getAll(Order);
 
 exports.findSpecificOrder = handlerFactory.getOne(Order);
+
+// api/v1/order/:orderId/pay
+exports.updateOrderToPaid = asyncHandler(async (req, res, next) => {
+  const order = await Order.findById(req.params.orderId);
+  if (!order) {
+    return next(new AppError(`Order not found`, 404));
+  }
+  order.isPaid = true;
+  order.paidAt = Date.now();
+
+  const updatedOrder = await order.save();
+  res.status(200).json({
+    status: 'success',
+    data: updatedOrder
+  });
+});
+
+// api/v1/order/:id/deliver
+exports.updateOrderToDeliverd = asyncHandler(async (req, res, next) => {
+  const order = await Order.findById(req.params.orderId);
+  if (!order) {
+    return next(new AppError(`Order not found`, 404));
+  }
+  order.isDelivered = true;
+  order.deliveredAt = Date.now();
+
+  const updatedOrder = await order.save();
+  res.status(200).json({
+    status: 'success',
+    data: updatedOrder
+  });
+});
+
+//api/v1/order/checkout-session/cartId
+exports.createSession = asyncHandler(async (req, res, next) => {
+  const cart = await Order.findById(req.params.cartId);
+  if (!cart) {
+    return next(new AppError(`Cart not found`, 404));
+  }
+  const taxPrice = 0;
+  const shippingPrice = 0;
+  const cartPrice = cart.totalPriceAfterDiscount
+    ? cart.totalPriceAfterDiscount
+    : cart.totalCartPrice;
+  const totalOrderPrice = cartPrice + taxPrice + shippingPrice;
+
+  const session = await stripe.checkout.sessions.create({
+    Line_items: [
+      {
+        name: req.user.name,
+        amount: totalOrderPrice * 100,
+        currency: 'egp',
+        quantity: 1
+      }
+    ],
+    mode: 'payment',
+    success_url: `${req.protocol}://${req.get('host')}/order`,
+    cancel_url: `${req.protocol}://${req.get('host')}/cart`,
+    customer_email: req.user.email,
+    metadata: req.body.shippingAddress,
+    client_reference_id: Cart._id
+  });
+  res.status(200).json({
+    status: 'success',
+    session
+  });
+});
