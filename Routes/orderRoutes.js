@@ -9,7 +9,10 @@ const {
   createCashOrder,
   filterOrderForLoggedUser,
   findAllOrders,
-  findSpecificOrder
+  findSpecificOrder,
+  updateOrderToPaid,
+  updateOrderToDeliverd,
+  createSession
 } = require('../Controllers/orderControllers');
 
 router.route('/:cartId').post(allowedTo('user'), createCashOrder);
@@ -21,5 +24,11 @@ router.get(
   findAllOrders
 );
 router.get('/:id', findSpecificOrder);
+
+router.get('/checkout-session/:cartId', allowedTo('user'), createSession);
+
+router.use(allowedTo('admin'));
+router.put('/:orderId/pay', updateOrderToPaid);
+router.put('/:orderId/deliver', updateOrderToDeliverd);
 
 module.exports = router;
