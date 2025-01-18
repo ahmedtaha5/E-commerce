@@ -11,6 +11,7 @@ const handlerFactory = require('../Controllers/handlerFactory');
 const Product = require('../Models/productModel');
 //const Coupon = require('../Models/couponModel');
 const Cart = require('../Models/cartModel');
+const User = require('../Models/userModel');
 
 // api/v1/orders/cartId
 exports.createCashOrder = asyncHandler(async (req, res, next) => {
@@ -150,4 +151,55 @@ exports.checkoutSession = asyncHandler(async (req, res, next) => {
     status: 'success',
     session
   });
+});
+
+const createCardOrder = async session => {
+  const cartId = session.client_reference_id;
+  const shippingAddress = session.metadata;
+  const cart = await Cart.findById(cartId);
+  const user = await User.findOne({ email: session.customer_email });
+
+  // Create order with default paymentMethodType card
+  const order = await Order.create({
+    user: user._id,
+    totalOrderPrice: cart.totalOrderPrice,
+    cartItems: cart.cartItems,
+    shippingAddress: shippingAddress,
+    isPaid: true,
+    paidAt: Date.now(),
+    paymentMethodType: 'card'
+  });
+
+  // 4) After creating order, decrement product quantity, increment product sold
+  if (order) {
+    const bulkOptions = cart.cartItems.map(item => ({
+      updateOne: {
+        filter: { _id: item.product },
+        update: { $inc: { quantity: -item.quantity, sold: +item.quantity } }
+      }
+    }));
+    await Product.bulkWrite(bulkOptions, {});
+
+    // clear cart
+    await cart.findByIdAndDelete(cartId);
+  }
+};
+
+exports.webhookCheckout = asyncHandler(async (req, res, next) => {
+  const sig = req.headers['stripe-signature'];
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+  if (event.type === 'checkout.session.completed') {
+    // create order
+    createCardOrder(event.data.object);
+  }
 });
