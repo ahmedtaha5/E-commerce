@@ -158,11 +158,12 @@ const createCardOrder = async session => {
   const shippingAddress = session.metadata;
   const cart = await Cart.findById(cartId);
   const user = await User.findOne({ email: session.customer_email });
+  const oderPrice = session.amount_total / 100;
 
   // Create order with default paymentMethodType card
   const order = await Order.create({
     user: user._id,
-    totalOrderPrice: cart.totalOrderPrice / 100,
+    totalOrderPrice: oderPrice,
     cartItems: cart.cartItems,
     shippingAddress: shippingAddress,
     isPaid: true,
