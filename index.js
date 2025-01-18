@@ -10,7 +10,17 @@ const AppError = require('./utils/appError');
 const dbConnection = require('./Config/database');
 
 // Routes
-const mountRoutes = require('./routes/allRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const subCategoryRoutes = require('./routes/subCategoryRoutes');
+const brandRoutes = require('./routes/brandRoutes');
+const productRoutes = require('./routes/productRoutes');
+const userRoutes = require('./routes/userRoutes');
+const authRoutes = require('./routes/authRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
+const wishlistRoutes = require('./routes/wishlistRoutes');
+const couponsRoutes = require('./routes/couponsRoutes');
+const cartRoutes = require('./routes/cartRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 dotenv.config({ path: 'config.env' });
 
@@ -29,7 +39,17 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'uploads')));
 
-mountRoutes(app);
+app.use('/api/v1/categories', categoryRoutes);
+app.use('/api/v1/subcategories', subCategoryRoutes);
+app.use('/api/v1/brands', brandRoutes);
+app.use('/api/v1/products', productRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/reviews', reviewRoutes);
+app.use('/api/v1/wishlist', wishlistRoutes);
+app.use('/api/v1/coupons', couponsRoutes);
+app.use('/api/v1/cart', cartRoutes);
+app.use('/api/v1/order', orderRoutes);
 
 // Handle undefined routes
 app.all('*', (req, res, next) => {
