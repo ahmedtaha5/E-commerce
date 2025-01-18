@@ -1,4 +1,4 @@
-// Routes
+//Routes
 const categoryRoutes = require('./categoryRoutes');
 const subCategoryRoutes = require('./subCategoryRoutes');
 const brandRoutes = require('./brandRoutes');

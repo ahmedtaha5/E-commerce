@@ -11,7 +11,7 @@ const AppError = require('./utils/appError');
 const dbConnection = require('./Config/database');
 
 // Routes
-const mountRoutes = require('./routes/index');
+const mountRoutes = require('./routes/mountRoutes');
 
 dotenv.config({ path: 'config.env' });
 
@@ -39,6 +39,7 @@ mountRoutes(app);
 // app.use('/api/v1/auth', authRoutes);
 // app.use('/api/v1/reviews', reviewRoutes);
 // app.use('/api/v1/wishlist', wishlistRoutes);
+
 // Handle undefined routes
 app.all('*', (req, res, next) => {
   return next(new AppError(`Cannot find this route: ${req.originalUrl}`, 404));
