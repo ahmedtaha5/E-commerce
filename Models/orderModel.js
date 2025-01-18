@@ -55,15 +55,14 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-orderSchema.pre(/^find/, function(next) {
+orderSchema.pre('/^find/', function(req, res, next) {
   this.populate({
     path: 'user',
     select: 'name profileImg email phone'
   }).populate({
     path: 'cartItems.product',
-    select: 'title imageCover '
+    select: 'title imageCover'
   });
-
   next();
 });
 
