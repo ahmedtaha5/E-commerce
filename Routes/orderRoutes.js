@@ -3,8 +3,6 @@ const express = require('express');
 const router = express.Router();
 
 const { protect, allowedTo } = require('../Controllers/authControllers');
-
-router.use(protect);
 const {
   createCashOrder,
   filterOrderForLoggedUser,
@@ -12,21 +10,26 @@ const {
   findSpecificOrder,
   updateOrderToPaid,
   updateOrderToDeliverd,
-  createSession
+  checkoutSession
 } = require('../Controllers/orderControllers');
 
-router.route('/:cartId').post(allowedTo('user'), createCashOrder);
+// Apply protect middleware to all routes
+router.use(protect);
 
+// Routes for users
+router.post('/:cartId', allowedTo('user'), createCashOrder);
+router.post('/checkout-session/:cartId', allowedTo('user'), checkoutSession); // Create Stripe checkout session
+
+// Routes for users, admins, and managers
 router.get(
   '/',
   allowedTo('user', 'admin', 'manager'),
   filterOrderForLoggedUser,
   findAllOrders
-);
-router.get('/:id', findSpecificOrder);
+); // Get all orders
+router.get('/:id', allowedTo('user', 'admin', 'manager'), findSpecificOrder); // Get specific order
 
-router.get('/checkout-session/:cartId', allowedTo('user'), createSession);
-
+// Routes for admins only
 router.use(allowedTo('admin'));
 router.put('/:orderId/pay', updateOrderToPaid);
 router.put('/:orderId/deliver', updateOrderToDeliverd);
