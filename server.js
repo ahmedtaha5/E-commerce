@@ -1,6 +1,8 @@
 const path = require('path');
 
 const express = require('express');
+const cors = require('cors');
+const compression = require('compression');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
@@ -17,6 +19,10 @@ dotenv.config({ path: 'config.env' });
 dbConnection();
 
 const app = express();
+// enable other domains to access your application
+app.use(cors());
+app.options('*', cors());
+app.use(compression());
 
 app.use(cookieParser());
 
