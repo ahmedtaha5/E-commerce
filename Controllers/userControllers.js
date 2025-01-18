@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcryptjs');
 const User = require('../Models/userModel');
 const handlerFactory = require('../Controllers/handlerFactory');
-const { uploadSingleImage } = require('../Middlewares/uploadImageMiddleware');
+const { uploadSingleImage } = require('../middlewares/uploadImageMiddleware');
 const AppError = require('../utils/appError');
 const generateToken = require('../utils/generateToken');
 

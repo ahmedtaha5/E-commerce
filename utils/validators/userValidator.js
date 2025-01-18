@@ -1,7 +1,7 @@
 const slugify = require('slugify');
 const { check, body } = require('express-validator');
 const bcrypt = require('bcryptjs');
-const validatorMiddleware = require('../../Middlewares/validatorMiddleware');
+const validatorMiddleware = require('../../middlewares/validatorMiddleware');
 const User = require('../../Models/userModel');
 
 exports.getUserValidator = [

@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const sharp = require('sharp');
 const {
   uploadMultipleImages
-} = require('./../Middlewares/uploadImageMiddleware');
+} = require('../middlewares/uploadImageMiddleware');
 const handlerFactory = require('../Controllers/handlerFactory');
 const Product = require('../Models/productModel');
 

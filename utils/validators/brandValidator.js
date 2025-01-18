@@ -1,6 +1,6 @@
 const slugify = require('slugify');
 const { check, body } = require('express-validator');
-const validatorMiddleware = require('../../Middlewares/validatorMiddleware');
+const validatorMiddleware = require('../../middlewares/validatorMiddleware');
 
 exports.getBrandValidator = [
   check('id')

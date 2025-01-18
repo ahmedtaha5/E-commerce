@@ -6,7 +6,7 @@ const compression = require('compression');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
-const globalError = require('./Middlewares/errorMiddleware');
+const globalError = require('./middlewares/errorMiddleware');
 const AppError = require('./utils/appError');
 const dbConnection = require('./Config/database');
 
