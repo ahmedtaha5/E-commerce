@@ -11,7 +11,7 @@ const AppError = require('./utils/appError');
 const dbConnection = require('./Config/database');
 
 // Routes
-const mountRoutes = require('./routes');
+const mountRoutes = require('./routes/index');
 
 dotenv.config({ path: 'config.env' });
 
