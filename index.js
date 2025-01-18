@@ -10,8 +10,8 @@ const AppError = require('./utils/appError');
 const dbConnection = require('./Config/database');
 
 // Routes
-const categoryRoutes = require('./routes/categoryRoutes');
 const subCategoryRoutes = require('./routes/subCategoryRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 const brandRoutes = require('./routes/brandRoutes');
 const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -22,23 +22,34 @@ const couponsRoutes = require('./routes/couponsRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 
+// Load environment variables
 dotenv.config({ path: 'config.env' });
 
 // Connect to the database
-dbConnection();
+dbConnection().catch(err => {
+  console.error('Database connection failed:', err);
+  process.exit(1);
+});
 
 const app = express();
-// enable other domains to access your application
+
+// Enable CORS
 app.use(cors());
 app.options('*', cors());
+
+// Compression middleware
 app.use(compression());
 
+// Cookie parser middleware
 app.use(cookieParser());
 
 // Middleware to parse JSON
 app.use(express.json());
+
+// Serve static files
 app.use(express.static(path.join(__dirname, 'uploads')));
 
+// Mount routes
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/subcategories', subCategoryRoutes);
 app.use('/api/v1/brands', brandRoutes);
@@ -62,20 +73,26 @@ if (process.env.NODE_ENV === 'development') {
   console.log(`Mode: ${process.env.NODE_ENV}`);
 }
 
-// Global error handling middleware for express errors
+// Global error handling middleware
 app.use(globalError);
 
-//Start the server
+// Start the server
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
   console.log(`API is running on port: ${port}`);
 });
 
-// Handle rejection outside express
+// Handle uncaught exceptions
+process.on('uncaughtException', err => {
+  console.error('Uncaught Exception Error:', `${err.name} | ${err.message}`);
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
 process.on('unhandledRejection', err => {
-  console.error(`UnhandledRejection Errors: ${err.name} | ${err.message}`);
+  console.error('Unhandled Rejection Error:', `${err.name} | ${err.message}`);
   server.close(() => {
-    console.error(`Shutting down....`);
+    console.error('Shutting down....');
     process.exit(1);
   });
 });
