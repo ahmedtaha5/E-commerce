@@ -10,17 +10,17 @@ const AppError = require('./utils/appError');
 const dbConnection = require('./Config/database');
 
 // Routes
-const subCategoryRoutes = require('./routes/subCategoryRoutes');
-const categoryRoutes = require('./routes/categoryRoutes');
-const brandRoutes = require('./routes/brandRoutes');
-const productRoutes = require('./routes/productRoutes');
-const userRoutes = require('./routes/userRoutes');
-const authRoutes = require('./routes/authRoutes');
-const reviewRoutes = require('./routes/reviewRoutes');
-const wishlistRoutes = require('./routes/wishlistRoutes');
-const couponsRoutes = require('./routes/couponsRoutes');
-const cartRoutes = require('./routes/cartRoutes');
-const orderRoutes = require('./routes/orderRoutes');
+const subCategoryRoutes = require('./routesss/subCategoryRoutes');
+const categoryRoutes = require('./routesss/categoryRoutes');
+const brandRoutes = require('./routesss/brandRoutes');
+const productRoutes = require('./routesss/productRoutes');
+const userRoutes = require('./routesss/userRoutes');
+const authRoutes = require('./routesss/authRoutes');
+const reviewRoutes = require('./routesss/reviewRoutes');
+const wishlistRoutes = require('./routesss/wishlistRoutes');
+const couponsRoutes = require('./routesss/couponsRoutes');
+const cartRoutes = require('./routesss/cartRoutes');
+const orderRoutes = require('./routesss/orderRoutes');
 
 // Load environment variables
 dotenv.config({ path: 'config.env' });

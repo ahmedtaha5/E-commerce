@@ -7,7 +7,7 @@ const {
   getSubCategoryValidator,
   updateSubCategoryValidator,
   deleteSubCategoryValidator
-} = require('./../utils/validators/subCategoryValidator');
+} = require('../utils/validators/subCategoryValidator');
 
 const { protect, allowedTo } = require('../Controllers/authControllers');
 
@@ -18,7 +18,7 @@ const {
   deleteSubCategory,
   createSubCategory,
   sendCategoryIdBody
-} = require('./../Controllers/subCategoryControllers');
+} = require('../Controllers/subCategoryControllers');
 
 router
   .route('/')
