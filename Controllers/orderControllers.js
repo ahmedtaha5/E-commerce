@@ -162,7 +162,7 @@ const createCardOrder = async session => {
   // Create order with default paymentMethodType card
   const order = await Order.create({
     user: user._id,
-    totalOrderPrice: cart.totalOrderPrice,
+    totalOrderPrice: cart.totalOrderPrice / 100,
     cartItems: cart.cartItems,
     shippingAddress: shippingAddress,
     isPaid: true,
@@ -199,6 +199,7 @@ exports.webhookCheckout = asyncHandler(async (req, res, next) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
   if (event.type === 'checkout.session.completed') {
+    console.log('create order hereeeeeee !!!!!!!');
     // create order
     createCardOrder(event.data.object);
   }

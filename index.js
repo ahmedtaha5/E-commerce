@@ -41,7 +41,12 @@ app.post(
 );
 
 // Enable CORS
-app.use(cors());
+app.use(
+  cors({
+    origin: 'https://your-frontend-domain.com', // Replace with your frontend URL
+    credentials: true
+  })
+);
 app.options('*', cors());
 
 // Compression middleware
