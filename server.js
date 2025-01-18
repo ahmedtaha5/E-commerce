@@ -59,7 +59,7 @@ process.on('uncaughtException', err => {
   process.exit(1); // Exit immediately for stability.
 });
 
-// Start the server
+//Start the server
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
   console.log(`API is running on port: ${port}`);
