@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 mongoose.set('strictQuery', false); // or true
 const dbConnection = () => {
-  mongoose
+  return mongoose
     .connect(process.env.DB)
     .then(() => {
       console.log('DB connected successfully');
@@ -12,4 +12,5 @@ const dbConnection = () => {
       process.exit(1);
     });
 };
+
 module.exports = dbConnection;
