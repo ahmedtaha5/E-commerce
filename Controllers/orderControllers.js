@@ -163,9 +163,9 @@ const createCardOrder = async session => {
   // Create order with default paymentMethodType card
   const order = await Order.create({
     user: user._id,
-    totalOrderPrice: oderPrice,
     cartItems: cart.cartItems,
-    shippingAddress: shippingAddress,
+    shippingAddress,
+    totalOrderPrice: oderPrice,
     isPaid: true,
     paidAt: Date.now(),
     paymentMethodType: 'card'
@@ -182,7 +182,7 @@ const createCardOrder = async session => {
     await Product.bulkWrite(bulkOptions, {});
 
     // clear cart
-    await cart.findByIdAndDelete(cartId);
+    await Cart.findByIdAndDelete(cartId);
   }
 };
 
@@ -200,8 +200,8 @@ exports.webhookCheckout = asyncHandler(async (req, res, next) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
   if (event.type === 'checkout.session.completed') {
-    console.log('create order hereeeeeee !!!!!!!');
     // create order
     createCardOrder(event.data.object);
   }
+  res.status(200).json({ received: true });
 });
