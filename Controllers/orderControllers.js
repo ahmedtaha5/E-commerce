@@ -181,7 +181,7 @@ const createCardOrder = async session => {
     }));
     await Product.bulkWrite(bulkOptions, {});
 
-    // clear cart
+    //  clear cart
     await Cart.findByIdAndDelete(cartId);
   }
 };
